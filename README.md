@@ -29,7 +29,7 @@ Standardization is applied to the feature data as part of the classification wor
 
 The project reports accuracy, precision, recall, F1-score and a confusion matrix on the held-out test set.
 
-The current reported test accuracy is **80.08% on 1,200 test images**. This result is specific to the dataset and experimental setup used in the repository and should not be interpreted as clinical performance.
+The repository includes a held-out test set of **1,200 images** in the current setup. Performance should be interpreted only within this dataset and experimental configuration.
 
 ## 📂 Structure
 
