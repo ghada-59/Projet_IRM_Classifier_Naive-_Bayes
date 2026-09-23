@@ -13,7 +13,7 @@ def evaluate_model(classifier, X_test, y_test, class_names):
     accuracy = accuracy_score(y_test, y_pred)
     
     print("\n" + "="*60)
-    print("AUTOMATED DIAGNOSTIC RESULTS")
+    print("MODEL EVALUATION RESULTS")
     print("="*60)
     print(f"Global Accuracy: {accuracy:.4f} ({accuracy*100:.2f}%)\n")
     
@@ -30,8 +30,8 @@ def evaluate_model(classifier, X_test, y_test, class_names):
     plt.colorbar(im)
     
     plt.title(f'Confusion Matrix (Accuracy: {accuracy*100:.2f}%)')
-    plt.xlabel('Predicted Diagnosis (AI)')
-    plt.ylabel('True Diagnosis (Ground Truth)')
+    plt.xlabel('Predicted Class')
+    plt.ylabel('True Class')
     
     # Configure axis ticks before writing text
     plt.xticks(range(len(class_names)), class_names, rotation=20)
