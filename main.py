@@ -17,7 +17,7 @@ def main():
     TEST_PATH = os.path.join(BASE_PATH, "Testing")
     
     print("="*60)
-    print(f"PROJECT: AUTOMATED MRI TUMOR DETECTION ({CLASSIFIER_TYPE.upper()})")
+    print(f"PROJECT: BRAIN MRI IMAGE CLASSIFICATION ({CLASSIFIER_TYPE.upper()})")
     print("="*60)
     
     # 1. Loading MRI images (Training & Testing)
