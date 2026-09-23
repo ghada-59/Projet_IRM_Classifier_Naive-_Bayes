@@ -35,33 +35,21 @@ def main():
     print(f"\nDimensions: {X_train.shape[1]} features extracted per MRI")
     print(f"Training samples: {X_train.shape[0]} | Test samples: {X_test.shape[0]}")
     
-    # 3. Training the classifier
-    classifier = train_classifier(X_train, y_train, CLASSIFIER_TYPE)
-    
-    # 4. Evaluation on test data
-    y_pred, accuracy, cm = evaluate_model(classifier, X_test, y_test, class_names)
-    
-    # 5. Detailed performance analysis
-    analyze_class_performance(cm, class_names)
-    
-    # Displaying data dimensions for verification (Sanity Check)
-    print(f"Dimensions: {X_train.shape[1]} features extracted per MRI")
-    print(f"Training samples: {X_train.shape[0]} | Test samples: {X_test.shape[0]}")
-
-    # --- DATA SCALING (Standardization) ---
+    # 3. Standardize features using training data only.
+    # This prevents test-set information from influencing preprocessing.
     print("\nStandardizing features (Scaling)...")
     scaler = StandardScaler()
-
-    # .fit_transform() computes the mean and standard deviation on the training set, then applies them
     X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
 
-    # .transform() normalizes the test set using ONLY the training parameters 
-    # (This is essential to avoid Data Leakage)
-    X_test = scaler.transform(X_test) 
-    # -----------------------------------------------------
+    # 4. Train the classifier on the processed training data.
+    classifier = train_classifier(X_train, y_train, CLASSIFIER_TYPE)
 
-    # Training the classifier (Bayes or SVM) on normalized data
-    classifier = train_classifier(X_train, y_train, classifier_type=CLASSIFIER_TYPE)
+    # 5. Evaluate only after preprocessing and training are complete.
+    y_pred, accuracy, cm = evaluate_model(classifier, X_test, y_test, class_names)
+
+    # 6. Detailed performance analysis.
+    analyze_class_performance(cm, class_names)
 
 if __name__ == "__main__":
     main()
