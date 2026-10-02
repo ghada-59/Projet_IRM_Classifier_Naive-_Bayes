@@ -6,7 +6,7 @@ from sklearn.svm import SVC
 
 
 def train_classifier(X_train, y_train, classifier_type="svm"):
-    """Train a classifier with preprocessing kept inside the CV workflow."""
+    """Train a classifier with scaling performed inside the CV workflow."""
     if classifier_type == "bayes":
         print("\nTraining Gaussian Naive Bayes...")
         classifier = Pipeline([
@@ -29,11 +29,7 @@ def train_classifier(X_train, y_train, classifier_type="svm"):
         ])
         cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
         classifier = GridSearchCV(
-            pipeline,
-            param_grid,
-            cv=cv,
-            scoring="accuracy",
-            n_jobs=-1,
+            pipeline, param_grid, cv=cv, scoring="accuracy", n_jobs=-1
         )
         classifier.fit(X_train, y_train)
         print(f"[+] Best SVM parameters found: {classifier.best_params_}")
