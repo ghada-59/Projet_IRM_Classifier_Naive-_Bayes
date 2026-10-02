@@ -1,36 +1,42 @@
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.naive_bayes import GaussianNB
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
-from sklearn.model_selection import GridSearchCV
 
-def train_classifier(X_train, y_train, classifier_type='svm'):
-    """
-    Trains a classifier (Naive Bayes or SVM optimized via GridSearchCV).
-    """
-    if classifier_type == 'bayes':
-        print("\nTraining Naive Bayes Classifier (GaussianNB)...")
-        classifier = GaussianNB()
+
+def train_classifier(X_train, y_train, classifier_type="svm"):
+    """Train a classifier with preprocessing kept inside the CV workflow."""
+    if classifier_type == "bayes":
+        print("\nTraining Gaussian Naive Bayes...")
+        classifier = Pipeline([
+            ("scaler", StandardScaler()),
+            ("classifier", GaussianNB()),
+        ])
         classifier.fit(X_train, y_train)
-        
-    elif classifier_type == 'svm':
-        print("\nSearching for the best hyperparameters for SVM (GridSearchCV)...")
-        # Define a parameter grid to test to find the optimal combination
+        return classifier
+
+    if classifier_type == "svm":
+        print("\nSearching for SVM hyperparameters with 3-fold cross-validation...")
         param_grid = {
-            'C': [1, 10, 50, 100],
-            'gamma': ['scale', 'auto', 0.01, 0.001],
-            'kernel': ['rbf']
+            "classifier__C": [1, 10, 50, 100],
+            "classifier__gamma": ["scale", "auto", 0.01, 0.001],
+            "classifier__kernel": ["rbf"],
         }
-        
-        # GridSearchCV tests all combinations using cross-validation (cv=3)
-        base_svc = SVC(probability=True, random_state=42)
-        classifier = GridSearchCV(base_svc, param_grid, cv=3, scoring='accuracy', n_jobs=-1)
-        
-        print("Launching optimized training...")
+        pipeline = Pipeline([
+            ("scaler", StandardScaler()),
+            ("classifier", SVC(probability=True, random_state=42)),
+        ])
+        cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
+        classifier = GridSearchCV(
+            pipeline,
+            param_grid,
+            cv=cv,
+            scoring="accuracy",
+            n_jobs=-1,
+        )
         classifier.fit(X_train, y_train)
-        
-        # Display the best parameters found
         print(f"[+] Best SVM parameters found: {classifier.best_params_}")
-        
-    else:
-        raise ValueError("Invalid classifier type (choose 'bayes' or 'svm').")
-        
-    return classifier
+        return classifier
+
+    raise ValueError("Invalid classifier type (choose 'bayes' or 'svm').")
