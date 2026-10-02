@@ -21,23 +21,14 @@ def main():
     print("=" * 60)
 
     X_train_raw, y_train, class_names = load_mri_split(
-        train_path,
-        max_images_per_class=MAX_PER_CLASS,
+        train_path, max_images_per_class=MAX_PER_CLASS
     )
-    if len(X_train_raw) == 0:
-        raise FileNotFoundError(
-            f"Training data not found or empty: {train_path}"
-        )
-
     X_test_raw, y_test, test_class_names = load_mri_split(
-        test_path,
-        class_names=class_names,
-        max_images_per_class=MAX_PER_CLASS,
+        test_path, class_names=class_names, max_images_per_class=MAX_PER_CLASS
     )
-    if len(X_test_raw) == 0:
-        raise FileNotFoundError(
-            f"Testing data not found or empty: {test_path}"
-        )
+
+    if len(X_train_raw) == 0 or len(X_test_raw) == 0:
+        raise ValueError("Training and testing datasets must both contain images.")
     if test_class_names != class_names:
         raise ValueError("Training and testing class mappings are inconsistent.")
 
@@ -50,10 +41,7 @@ def main():
     classifier = train_classifier(X_train, y_train, CLASSIFIER_TYPE)
 
     y_pred, accuracy, cm = evaluate_model(
-        classifier,
-        X_test,
-        y_test,
-        class_names,
+        classifier, X_test, y_test, class_names,
         output_dir=PROJECT_ROOT / "results",
     )
     analyze_class_performance(cm, class_names)
