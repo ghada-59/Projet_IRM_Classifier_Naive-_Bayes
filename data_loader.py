@@ -1,4 +1,5 @@
 from pathlib import Path
+import random
 
 import numpy as np
 from skimage import color, io, transform
@@ -7,8 +8,13 @@ IMG_SIZE = (64, 64)
 VALID_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff"}
 
 
-def load_mri_split(split_path, class_names=None, max_images_per_class=None):
-    """Load MRI images, resize them, and convert them to grayscale."""
+def load_mri_split(
+    split_path,
+    class_names=None,
+    max_images_per_class=None,
+    random_state=42,
+):
+    """Load MRI images, optionally using a reproducible random subset."""
     split_path = Path(split_path)
     if not split_path.is_dir():
         raise FileNotFoundError(f"Directory not found: {split_path}")
@@ -23,7 +29,9 @@ def load_mri_split(split_path, class_names=None, max_images_per_class=None):
     if not class_names:
         raise ValueError(f"No class directories found in {split_path}")
 
+    rng = random.Random(random_state)
     images, labels = [], []
+
     for label_idx, class_name in enumerate(class_names):
         folder_path = split_path / class_name
         if not folder_path.is_dir():
@@ -33,10 +41,11 @@ def load_mri_split(split_path, class_names=None, max_images_per_class=None):
             p for p in folder_path.iterdir()
             if p.is_file() and p.suffix.lower() in VALID_EXTENSIONS
         )
-        selected_files = (
-            image_files[:max_images_per_class]
-            if max_images_per_class is not None else image_files
-        )
+
+        if max_images_per_class is None or len(image_files) <= max_images_per_class:
+            selected_files = image_files
+        else:
+            selected_files = sorted(rng.sample(image_files, max_images_per_class))
 
         for img_path in selected_files:
             try:
