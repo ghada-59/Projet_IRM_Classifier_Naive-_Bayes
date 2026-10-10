@@ -107,3 +107,13 @@ Projet_IRM_Classifier_Naive-_Bayes/
 ## 📝 Project Type
 
 **Academic / practice project.** The project demonstrates image preprocessing, feature engineering, classical classification, cross-validation and evaluation on a public dataset.
+
+---
+
+## Additional experiment: Structural morphometry + Random Forest
+
+A second classical workflow is available in [`experiments/structural_morphometrics/`](https://github.com/ghada-59/Projet_IRM_Classifier_Naive-_Bayes/tree/main/experiments/structural_morphometrics). It uses 37 handcrafted intensity, gradient, texture and 2D shape-proxy descriptors with a Random Forest classifier on BRISC2025.
+
+The supplied source notebook reports **87.80% accuracy** and **87.70% macro-F1** on a 1,000-image validation split. These are explicitly source-reported reference values and have **not yet been independently reproduced by the cleaned implementation**. Run the included pipeline on the downloaded dataset to generate new metrics, a confusion matrix, per-class scores, feature-importance plots and validation examples.
+
+This is a separate experiment with a different dataset/configuration from the root pixel/HOG + Naive Bayes/SVM workflow; do not compare their scores as a controlled model benchmark. The Otsu threshold in the morphometric workflow is a bright-region proxy, **not a tumor segmentation mask**. Neither workflow is a medical diagnostic tool.
