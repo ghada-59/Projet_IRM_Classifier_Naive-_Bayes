@@ -30,6 +30,17 @@ The supplied source reports one stratified 80/20 split of 5,000 images (1,000 va
 
 Per-class F1-score reported in the source: glioma 81.60%, meningioma 82.96%, no_tumor 94.64%, pituitary 91.60%.
 
+### Reference visualizations
+
+These SVG charts visualize the numerical values above as reported in the provided source PDF; they are **not fresh model outputs**.
+
+![Source-reported validation metrics](assets/source_validation_metrics.svg)
+
+![Source-reported class distribution](assets/source_class_distribution.svg)
+
+![Source-reported per-class metrics](assets/source_per_class_metrics.svg)
+
+
 Re-run the code on your downloaded dataset before claiming that these values were reproduced by this implementation. Do not change metrics manually to reach a target. Any 100% result from a synthetic-data smoke test is only a software check and is not a medical-image result.
 
 ## Dataset
