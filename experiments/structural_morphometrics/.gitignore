@@ -2,12 +2,13 @@
 __pycache__/
 .pytest_cache/
 *.py[cod]
+
+# Local experiment outputs
 reports/
 reports-smoke/
+reports_smoke/
+
+# Generated model and prediction files
 *.joblib
 *.pkl
-__pycache__/
-*.py[cod]
-reports_smoke/
-reports_independent_test/model_bundle.joblib
 reports_independent_test/test_predictions.csv
