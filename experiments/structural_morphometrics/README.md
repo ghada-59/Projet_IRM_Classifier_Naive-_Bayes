@@ -1,61 +1,58 @@
-# Brain MRI Classification — Handcrafted Features + Random Forest
+# Brain MRI Classification with Handcrafted Features
 
-**Academic/practice experiment. Not a medical diagnostic tool.** This folder adds a second classical machine-learning workflow to the parent repository. The original experiment compares Gaussian Naive Bayes and SVM using pixel/HOG descriptors; this experiment uses 37 handcrafted intensity, gradient, texture and 2D shape-proxy descriptors with Random Forest.
+This experiment uses 37 image-derived intensity, gradient, texture and 2D shape-proxy descriptors with a Random Forest classifier. It is separate from the repository's pixel/HOG baseline.
 
-## Objective
+The workflow is intended for educational image classification. It does not perform validated tumor detection or segmentation.
 
-Explore whether image-derived descriptors can discriminate four image-level labels in the BRISC2025 classification dataset: glioma, meningioma, no_tumor, and pituitary.
+## Method
 
-This is a classification exercise, not tumor detection or segmentation. The Otsu threshold selects a bright connected image region; it is **not** a radiologist-annotated tumor mask. Area, thickness, circularity and complexity are therefore image-region proxies, not verified tumor measurements or clinical biomarkers.
+1. Read images from class-specific directories.
+2. Resize images to 224 × 224 pixels, normalize intensity values and apply Gaussian smoothing.
+3. Calculate an Otsu-thresholded region and extract 37 handcrafted descriptors.
+4. Fit a `StandardScaler` and a `RandomForestClassifier` with 400 trees and balanced class weights.
+5. Save evaluation metrics, per-class scores, feature importances and diagnostic figures.
 
-## Pipeline
+In the validation workflow, the images are split at image level using a stratified 80/20 split and random seed 42. The separate evaluation script instead fits the model on the supplied `Training` directory and evaluates it on `Testing`.
 
-1. Read grayscale/RGB images from class-named folders.
-2. Resize to 224 × 224, normalize intensities, and apply Gaussian smoothing.
-3. Build an Otsu threshold region and derive 37 intensity, gradient, texture and shape-proxy descriptors.
-4. Make a stratified 80/20 image-level train/validation split (random_state=42).
-5. Train StandardScaler + RandomForestClassifier (400 trees, balanced class weights).
-6. Save metrics, CSV reports, a model bundle, and visual diagnostics.
+The Otsu-thresholded region is a bright-region proxy, not a radiologist-annotated tumor mask. Values such as area, thickness, circularity and complexity are therefore image-region descriptors, not verified tumor measurements or clinical biomarkers.
 
-## Results transcribed from the source notebook/PDF
+## Reference results reported in the supplied source
 
-The supplied source reports one stratified 80/20 split of 5,000 images (1,000 validation images). These are historical source results, **not independently reproduced by the cleaned script yet**.
+The supplied source notebook/PDF reports the following values for a stratified 80/20 split of 5,000 images, including 1,000 validation images.
 
-| Metric | Source-reported result |
+| Metric | Source-reported value |
 |---|---:|
-| Accuracy | **87.80%** |
-| Macro precision | **88.18%** |
-| Macro recall | **87.57%** |
-| Macro F1-score | **87.70%** |
+| Accuracy | 87.80% |
+| Macro precision | 88.18% |
+| Macro recall | 87.57% |
+| Macro F1-score | 87.70% |
 
-Per-class F1-score reported in the source: glioma 81.60%, meningioma 82.96%, no_tumor 94.64%, pituitary 91.60%.
+The source reports per-class F1-scores of 81.60% for glioma, 82.96% for meningioma, 94.64% for no-tumor and 91.60% for pituitary.
 
-### Reference visualizations
+These values are transcribed from the supplied source; they are not outputs from the scripts in this repository. The following charts reproduce the reference values and should be read as source summaries, not as newly generated evaluation results.
 
-These SVG charts visualize the numerical values above as reported in the provided source PDF; they are **not fresh model outputs**.
+![Reference validation metrics](assets/source_validation_metrics.svg)
 
-![Source-reported validation metrics](assets/source_validation_metrics.svg)
+![Reference class distribution](assets/source_class_distribution.svg)
 
-![Source-reported class distribution](assets/source_class_distribution.svg)
+![Reference per-class metrics](assets/source_per_class_metrics.svg)
 
-![Source-reported per-class metrics](assets/source_per_class_metrics.svg)
+## Independent test evaluation
 
+The separate script `evaluate_independent_test.py` fits the pipeline using the `Training` directory and evaluates it on the separate `Testing` directory without fitting on the test data.
 
-Re-run the code on your downloaded dataset before claiming that these values were reproduced by this implementation. Do not change metrics manually to reach a target. Any 100% result from a synthetic-data smoke test is only a software check and is not a medical-image result.
-
-## Independent test evaluation (October 2026)
-
-A separate evaluation script, `evaluate_independent_test.py`, trains the pipeline on the `Training` directory and evaluates it on the separate `Testing` directory. The independent test set is not used to fit the model.
-
-**Dataset split**
+**Dataset used for this run**
 - Training images: 5,600 (1,400 per class)
-- Independent test images: 1,600 (400 per class)
-- Number of handcrafted features: 37
-- Classifier: StandardScaler + RandomForestClassifier
+- Test images: 1,600 (400 per class)
+- Classes: `glioma`, `meningioma`, `notumor` and `pituitary`
+- Features: 37
+- Classifier: `StandardScaler` + `RandomForestClassifier` (400 trees)
 
-### Overall test results
+These counts and labels differ from the BRISC2025 distribution shown in the source reference above. The local `Training` and `Testing` dataset used for this run has not yet been identified by a dataset citation in this repository; the results below should not be attributed to BRISC2025.
 
-| Metric | Independent test result |
+### Overall results
+
+| Metric | Test result |
 |---|---:|
 | Accuracy | 86.25% |
 | Macro precision | 86.67% |
@@ -71,65 +68,51 @@ A separate evaluation script, `evaluate_independent_test.py`, trains the pipelin
 | notumor | 87.91% | 100.00% | 93.57% | 400 |
 | pituitary | 91.60% | 92.75% | 92.17% | 400 |
 
-### Independent test visualizations
+The model correctly classified 254 of 400 glioma images, giving a glioma recall of 63.5%. The overall accuracy should be interpreted alongside this class-specific result.
 
 ![Independent test confusion matrix](reports_independent_test/figures/independent_test_confusion_matrix.png)
 
 ![Top 15 feature importances](reports_independent_test/figures/feature_importance_top15.png)
 
-The confusion matrix shows that the model correctly classified 254 of 400 glioma images (63.5% recall). This limitation must be considered alongside the overall accuracy. The model also confuses some glioma images with meningioma and no-tumor classes.
+Feature importance indicates how the fitted Random Forest uses the descriptors for prediction. It does not establish biological causality or clinical significance.
 
-Feature importance reflects how the fitted Random Forest uses the descriptors for prediction. It does not demonstrate biological causality or clinical significance.
+### Reproduce the independent evaluation
 
-### Reproducing the independent test
-
-Run the following command from the repository root. The dataset must already be downloaded and available in the expected directories.
+Run this command from the repository root. The dataset must be available in the indicated directories.
 
 ```powershell
 python experiments/structural_morphometrics/evaluate_independent_test.py --train-dir "brain_mri_dataset/Training" --test-dir "brain_mri_dataset/Testing" --output-dir "experiments/structural_morphometrics/reports_independent_test" --random-state 42
 ```
 
-The script saves the evaluation metrics, per-class classification report, feature importances, and visualization figures in the output directory. Generated model bundles and individual test predictions are excluded from version control.
+The script writes a JSON metrics summary, a CSV classification report, feature importances, a confusion matrix and a feature-importance figure. Model bundles and per-image prediction files are generated locally but are excluded from version control.
 
-**Limitations:** This is an educational image-classification experiment, not a diagnostic system. The Otsu-derived region is not a tumor segmentation mask, and the reported performance does not establish clinical validity.
+## Run the validation workflow
 
-## Dataset
+The dataset directory should directly contain one folder per class. For BRISC2025, the expected folder for this script is `classification_task/train/`, not the dataset root or the `classification_task` parent folder.
 
-Images are not committed to this repository. Download BRISC2025 from its [dataset page](https://www.kaggle.com/datasets/briscdataset/brisc2025/) and check the dataset terms. The expected folder is the one directly containing one directory per class:
+Install the dependencies and run the script from this directory (`experiments/structural_morphometrics`):
 
-~~~text
-classification_task/train/
-├── glioma/
-├── meningioma/
-├── no_tumor/
-└── pituitary/
-~~~
-
-Do not pass the BRISC2025 parent folder or classification_task folder; pass classification_task/train directly.
-
-## Run on Windows PowerShell
-
-From this folder (experiments/structural_morphometrics):
-
-~~~powershell
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 python morphometric_pipeline.py --data-dir "D:\datasets\brisc2025\brisc2025\classification_task\train" --output-dir reports
-~~~
+```
 
-Replace the example path with your actual dataset location. For a quick smoke test, use a small subset first:
+Replace the example dataset path with the path on your computer. To check the pipeline quickly before a full run, limit the number of images per class:
 
-~~~powershell
+```powershell
 python morphometric_pipeline.py --data-dir "D:\datasets\brisc2025\brisc2025\classification_task\train" --output-dir reports-smoke --max-images-per-class 10
-~~~
+```
 
-**Do not report smoke-test metrics as final model results.** For the full experiment, omit --max-images-per-class.
+Metrics from this small run are intended only as a software check and should not be presented as full-dataset performance. For the full run, omit `--max-images-per-class`.
 
-## Outputs and visualizations
+## Output files
 
-~~~text
+The validation workflow writes the following files under its output directory:
+
+```text
 reports/
 ├── classification_report.csv
 ├── feature_importance.csv
@@ -144,24 +127,27 @@ reports/
     ├── per_class_metrics.png
     ├── sample_images.png
     └── validation_examples.png
-~~~
+```
 
-The validation-example figure overlays the Otsu region and gradient map. It is a visual diagnostic only and must not be labelled as tumor segmentation. Random Forest feature importances are predictive model statistics, not evidence of biological causality.
+The validation-example figure overlays the Otsu region and gradient map for visual inspection; it is not a tumor segmentation result.
 
 ## Tests
 
-~~~powershell
+Run the unit tests from this directory:
+
+```powershell
 python -m pytest -q
-~~~
+```
 
 ## Limitations
 
-- The source PDF uses a held-out split from the train directory, not the dataset's independent test directory.
-- A random image-level split may not establish patient-level generalization.
-- The thresholded region is not a tumor annotation and may select non-tumor structures.
+- The source reference uses a validation split from the training data; it is not an independent test-set result from the supplied scripts.
+- The separate `Training`/`Testing` run uses a dataset whose citation has not yet been recorded in this repository.
+- Image-level splitting does not establish patient-level generalization.
+- The Otsu region can select non-tumor structures.
 - Model scores are not calibrated clinical probabilities.
 - Performance on a public dataset does not establish clinical validity or utility.
 
-## Citation
+## Reference
 
 Fateh, A. et al. (2025). *BRISC: Annotated dataset for brain tumor segmentation and classification with Swin-HAFNet*. [arXiv:2506.14318](https://arxiv.org/abs/2506.14318).
