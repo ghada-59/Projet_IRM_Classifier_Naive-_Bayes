@@ -58,7 +58,7 @@ Install the dependencies in a virtual environment:
 ```bash
 python -m venv .venv
 # Windows:
-.venv\\Scripts\\activate
+.venv\Scripts\activate
 # macOS/Linux:
 source .venv/bin/activate
 python -m pip install -r requirements.txt
