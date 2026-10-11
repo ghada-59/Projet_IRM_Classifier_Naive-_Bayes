@@ -1,46 +1,39 @@
-# 🧠 Brain MRI Classification with Classical Machine Learning
+# Brain MRI Image Classification with Classical Machine Learning
 
-Academic/practice project for classifying brain MRI images into four categories present in the dataset: **glioma, meningioma, no tumor and pituitary**.
+This repository contains two classical machine-learning experiments for image-level classification of brain MRI scans. They are intended for learning and experimentation, not for medical diagnosis.
 
-## 🎯 Objective
+## 1. Pixel and HOG baseline
 
-The project explores a classical machine-learning workflow for image classification using image-derived features rather than an end-to-end deep-learning model.
+The main workflow resizes each grayscale image to 64 × 64 pixels and combines:
 
-## 🔬 Feature Engineering
+- 4,096 flattened pixel-intensity values
+- 1,764 Histogram of Oriented Gradients (HOG) descriptors
 
-Each grayscale MRI is resized to **64 × 64** pixels. Two types of information are combined:
+The resulting feature vector contains 5,860 values. The available classifiers are Gaussian Naive Bayes and an RBF-kernel Support Vector Machine (SVM). For SVM, hyperparameter selection uses stratified three-fold cross-validation, with standardization inside the scikit-learn pipeline.
 
-- flattened pixel intensities: 4,096 features
-- HOG (Histogram of Oriented Gradients): 1,764 features
+The default run samples at most 300 images per class from each of the `Training` and `Testing` folders to keep computation manageable. This subset is reproducible with random seed 42, but it is not a substitute for evaluating the complete dataset.
 
-This produces **5,860 features per image** with the current configuration.
+## 2. Handcrafted descriptors and Random Forest
 
-## 🤖 Models
+The separate workflow in [`experiments/structural_morphometrics/`](experiments/structural_morphometrics/README.md) extracts 37 intensity, gradient, texture and 2D shape-proxy descriptors and trains a Random Forest classifier.
 
-The repository contains two classifier options:
+Its Otsu-thresholded region is a simple image-processing proxy, not an annotated tumor mask. The derived shape values should not be interpreted as verified tumor measurements or clinical biomarkers.
 
-- Gaussian Naive Bayes
-- Support Vector Machine (SVM)
+## Results and dataset provenance
 
-For SVM, `GridSearchCV` explores a small RBF-kernel hyperparameter grid using stratified 3-fold cross-validation.
+### Reference values reported in the supplied BRISC2025 source
 
-Feature standardization is part of the scikit-learn `Pipeline`, so the scaler is fitted separately within each cross-validation fold.
+The supplied source notebook/PDF reports 87.80% accuracy and 87.70% macro F1-score on a 1,000-image validation split. It also reports 88.18% macro precision and 87.57% macro recall. These are reference values transcribed from that source; they were not produced by the current scripts in this repository. The accompanying reference charts are labelled accordingly.
 
-## 📊 Evaluation
+### Separate evaluation using Training and Testing folders
 
-The final classifier is evaluated on the held-out **Testing** directory using:
+A separate run of the handcrafted-feature pipeline was evaluated on 5,600 training images and 1,600 test images, with 37 features and a Random Forest classifier. It achieved 86.25% accuracy and 85.74% macro F1-score. The recall for the `glioma` class was 63.50%.
 
-- accuracy
-- precision
-- recall
-- F1-score
-- confusion matrix
+This evaluation used local `brain_mri_dataset/Training` and `brain_mri_dataset/Testing` folders with class names `glioma`, `meningioma`, `notumor` and `pituitary`. The source of this dataset is not currently documented in the repository. These results should therefore not be attributed to BRISC2025 or compared directly with the source-reported BRISC2025 values. Full metrics and figures are available in the [structural morphometry report](experiments/structural_morphometrics/README.md#independent-test-evaluation).
 
-The default configuration uses at most **300 images per class from both Training and Testing**. When a split contains more than 300 images in a class, the subset is selected randomly with a fixed seed (`42`) for reproducibility.
+## Dataset layout for the baseline workflow
 
-This cap is an experimental convenience to keep the classical feature-based workflow manageable; it is **not a replacement for evaluation on the complete dataset**.
-
-## 📂 Dataset Organization
+Place the dataset under `brain_mri_dataset/`:
 
 ```text
 brain_mri_dataset/
@@ -56,64 +49,57 @@ brain_mri_dataset/
     └── pituitary/
 ```
 
-Class names are read from the training directory and reused for the testing split.
+The dataset itself is not included in this repository. Class names are read from the training directory and reused for the testing split.
 
-## 🛠️ Technologies
+## Setup and run
 
-Python · NumPy · scikit-image · scikit-learn · HOG · SVM · Naive Bayes · Matplotlib
-
-## 🚀 Run
-
-Create a virtual environment and install the dependencies:
+Install the dependencies in a virtual environment:
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+# Windows:
+.venv\\Scripts\\activate
+# macOS/Linux:
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
-Place the dataset in `brain_mri_dataset/` using the structure above, then run:
+Place the dataset in the layout shown above, then run:
 
 ```bash
 python main.py
 ```
 
-The confusion matrix is saved under `results/confusion_matrix.png`.
+The baseline confusion matrix is saved to `results/confusion_matrix.png`.
 
-## ⚠️ Limitations
+## Technologies
 
-- This is an **academic/practice machine-learning project**, not a medical diagnostic system.
-- The dataset is a specific public dataset; results should not be generalized to clinical populations without independent validation.
-- The current workflow uses grayscale 64 × 64 images and HOG features plus raw pixels, which may discard clinically relevant image information.
-- The default 300-images-per-class cap means the reported test metrics depend on the selected subset.
-- The SVM hyperparameters are selected using accuracy as the cross-validation criterion; this does not establish clinical usefulness.
-- Dataset-level performance does not establish patient-level clinical performance.
+Python, NumPy, scikit-image, scikit-learn, HOG, Gaussian Naive Bayes, SVM, Random Forest, OpenCV and Matplotlib.
 
-## 📁 Project Structure
+## Limitations
+
+- Both workflows classify images; neither performs validated tumor detection or segmentation.
+- The default 300-images-per-class cap limits the baseline evaluation to a subset.
+- The reported results are dataset-level image classification results, not patient-level clinical performance.
+- The separate Training/Testing evaluation has no documented dataset citation yet.
+- Results from different datasets and configurations are not a controlled model comparison.
+- External validation would be required before drawing conclusions about clinical use.
+
+## Project structure
 
 ```text
-Projet_IRM_Classifier_Naive-_Bayes/
-├── brain_mri_dataset/
+.
 ├── data_loader.py
 ├── feature_extractor.py
 ├── models.py
 ├── evaluator.py
 ├── main.py
-├── results/
 ├── requirements.txt
-└── README.md
+├── results/
+└── experiments/
+    └── structural_morphometrics/
+        ├── morphometric_pipeline.py
+        ├── evaluate_independent_test.py
+        ├── tests/
+        └── reports_independent_test/
 ```
-
-## 📝 Project Type
-
-**Academic / practice project.** The project demonstrates image preprocessing, feature engineering, classical classification, cross-validation and evaluation on a public dataset.
-
----
-
-## Additional experiment: Structural morphometry + Random Forest
-
-A second classical workflow is available in [`experiments/structural_morphometrics/`](https://github.com/ghada-59/Projet_IRM_Classifier_Naive-_Bayes/tree/main/experiments/structural_morphometrics). It uses 37 handcrafted intensity, gradient, texture and 2D shape-proxy descriptors with a Random Forest classifier on BRISC2025.
-
-The supplied source notebook reports **87.80% accuracy** and **87.70% macro-F1** on a 1,000-image validation split. These are explicitly source-reported reference values and have **not yet been independently reproduced by the cleaned implementation**. Run the included pipeline on the downloaded dataset to generate new metrics, a confusion matrix, per-class scores, feature-importance plots and validation examples.
-
-This is a separate experiment with a different dataset/configuration from the root pixel/HOG + Naive Bayes/SVM workflow; do not compare their scores as a controlled model benchmark. The Otsu threshold in the morphometric workflow is a bright-region proxy, **not a tumor segmentation mask**. Neither workflow is a medical diagnostic tool.
