@@ -43,6 +43,56 @@ These SVG charts visualize the numerical values above as reported in the provide
 
 Re-run the code on your downloaded dataset before claiming that these values were reproduced by this implementation. Do not change metrics manually to reach a target. Any 100% result from a synthetic-data smoke test is only a software check and is not a medical-image result.
 
+## Independent test evaluation (October 2026)
+
+A separate evaluation script, `evaluate_independent_test.py`, trains the pipeline on the `Training` directory and evaluates it on the separate `Testing` directory. The independent test set is not used to fit the model.
+
+**Dataset split**
+- Training images: 5,600 (1,400 per class)
+- Independent test images: 1,600 (400 per class)
+- Number of handcrafted features: 37
+- Classifier: StandardScaler + RandomForestClassifier
+
+### Overall test results
+
+| Metric | Independent test result |
+|---|---:|
+| Accuracy | 86.25% |
+| Macro precision | 86.67% |
+| Macro recall | 86.25% |
+| Macro F1-score | 85.74% |
+
+### Per-class results
+
+| Class | Precision | Recall | F1-score | Test images |
+|---|---:|---:|---:|---:|
+| glioma | 89.12% | 63.50% | 74.16% | 400 |
+| meningioma | 78.02% | 88.75% | 83.04% | 400 |
+| notumor | 87.91% | 100.00% | 93.57% | 400 |
+| pituitary | 91.60% | 92.75% | 92.17% | 400 |
+
+### Independent test visualizations
+
+![Independent test confusion matrix](reports_independent_test/figures/independent_test_confusion_matrix.png)
+
+![Top 15 feature importances](reports_independent_test/figures/feature_importance_top15.png)
+
+The confusion matrix shows that the model correctly classified 254 of 400 glioma images (63.5% recall). This limitation must be considered alongside the overall accuracy. The model also confuses some glioma images with meningioma and no-tumor classes.
+
+Feature importance reflects how the fitted Random Forest uses the descriptors for prediction. It does not demonstrate biological causality or clinical significance.
+
+### Reproducing the independent test
+
+Run the following command from the repository root. The dataset must already be downloaded and available in the expected directories.
+
+```powershell
+python experiments/structural_morphometrics/evaluate_independent_test.py --train-dir "brain_mri_dataset/Training" --test-dir "brain_mri_dataset/Testing" --output-dir "experiments/structural_morphometrics/reports_independent_test" --random-state 42
+```
+
+The script saves the evaluation metrics, per-class classification report, feature importances, and visualization figures in the output directory. Generated model bundles and individual test predictions are excluded from version control.
+
+**Limitations:** This is an educational image-classification experiment, not a diagnostic system. The Otsu-derived region is not a tumor segmentation mask, and the reported performance does not establish clinical validity.
+
 ## Dataset
 
 Images are not committed to this repository. Download BRISC2025 from its [dataset page](https://www.kaggle.com/datasets/briscdataset/brisc2025/) and check the dataset terms. The expected folder is the one directly containing one directory per class:

@@ -1,14 +1,21 @@
-# Fichiers temporaires Python
+# Python environments
+.venv/
+venv/
 __pycache__/
-*.pyc
-.vscode/
-.idea/
+*.py[cod]
 
-# Fichiers de dataset
-brain_mri_dataset/
-__pycache__/
-*.pyc
-.ipynb_checkpoints/
-
-# Fichiers de configuration / système
+# Local environment and temporary files
+.env
+*.log
 .DS_Store
+Thumbs.db
+
+# Raw MRI datasets
+brain_mri_dataset/
+data/
+
+# Local model artifacts
+*.joblib
+*.pkl
+
+# Keep source code, reports and figures under version control unless explicitly ignored.

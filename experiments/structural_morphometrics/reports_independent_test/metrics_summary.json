@@ -1,0 +1,30 @@
+{
+  "accuracy": 0.8625,
+  "macro_precision": 0.8666545280580369,
+  "macro_recall": 0.8625,
+  "macro_f1": 0.8573567102989675,
+  "n_training_images": 5600,
+  "n_independent_test_images": 1600,
+  "training_class_counts": {
+    "glioma": 1400,
+    "meningioma": 1400,
+    "notumor": 1400,
+    "pituitary": 1400
+  },
+  "test_class_counts": {
+    "glioma": 400,
+    "meningioma": 400,
+    "notumor": 400,
+    "pituitary": 400
+  },
+  "feature_count": 37,
+  "classes": [
+    "glioma",
+    "meningioma",
+    "notumor",
+    "pituitary"
+  ],
+  "evaluation": "Model fitted on Training; evaluated on separate Testing folder.",
+  "random_state": 42,
+  "clinical_use": "Educational only; not for diagnosis. Otsu mask is not tumor segmentation."
+}

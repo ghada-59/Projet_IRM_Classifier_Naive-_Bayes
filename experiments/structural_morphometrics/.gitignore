@@ -6,3 +6,8 @@ reports/
 reports-smoke/
 *.joblib
 *.pkl
+__pycache__/
+*.py[cod]
+reports_smoke/
+reports_independent_test/model_bundle.joblib
+reports_independent_test/test_predictions.csv
