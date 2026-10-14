@@ -1,6 +1,16 @@
 name: MRI Workbench Build
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "api.py"
+      - "data_loader.py"
+      - "feature_extractor.py"
+      - "models.py"
+      - "frontend/**"
+      - "requirements*.txt"
+      - ".github/workflows/mri-workbench-build.yml"
   pull_request:
     paths:
       - "api.py"
